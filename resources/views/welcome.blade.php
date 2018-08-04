@@ -13,7 +13,7 @@
 
     </head>
     <body>
-        <div class="container">
+        <div class="container mt-5">
             <div id="app">
                 <contacts></contacts>
             </div>

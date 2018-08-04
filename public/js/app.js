@@ -13890,6 +13890,8 @@ __webpack_require__(13);
 
 window.Vue = __webpack_require__(36);
 
+var axios = __webpack_require__(17);
+
 Vue.component('contacts', __webpack_require__(48));
 
 var app = new Vue({
@@ -47364,6 +47366,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -47380,16 +47390,66 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   mounted: function mounted() {
     console.log('Contacts Component loaded.');
+    this.fetchContactList();
   },
 
   methods: {
+    fetchContactList: function fetchContactList() {
+      var _this = this;
+
+      console.log('Fecthing contacts...');
+      axios.get('/api/contacts').then(function (response) {
+        console.log(response.data);
+        _this.list = response.data;
+      }).catch(function (error) {
+        console.log(error);
+      });
+    },
     createContact: function createContact() {
       console.log('Creating Contact...');
-      return;
+      var self = this;
+      var params = Object.assign({}, self.contact);
+      axios.post('api/contact/store', params).then(function () {
+        self.contact.name = '';
+        self.contact.phone = '';
+        self.contact.email = '';
+        self.edit = false;
+        self.fetchContactList();
+      }).catch(function (error) {
+        console.log(error);
+      });
+    },
+    showContact: function showContact(id) {
+      var self = this;
+      axios.get('/api/contact/' + id).then(function (response) {
+        self.contact.id = response.data.id;
+        self.contact.name = response.data.name;
+        self.contact.phone = response.data.phone;
+        self.contact.email = response.data.email;
+      });
+      self.edit = true;
     },
     updateContact: function updateContact(id) {
       console.log('Editing Contact ' + id + ' ...');
-      return;
+      var self = this;
+      var params = Object.assign({}, self.contact);
+      axios.patch('api/contact/' + id, params).then(function () {
+        self.contact.name = '';
+        self.contact.phone = '';
+        self.contact.email = '';
+        self.edit = false;
+        self.fetchContactList();
+      }).catch(function (error) {
+        console.log(error);
+      });
+    },
+    deleteContact: function deleteContact(id) {
+      var self = this;
+      axios.delete('/api/contact/' + id).then(function (response) {
+        self.fetchContactList();
+      }).catch(function (error) {
+        console.log(error);
+      });
     }
   }
 });
@@ -47403,7 +47463,7 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("h1", [_vm._v("Contacts")]),
+    _c("h1", [_vm._v("Add Contact")]),
     _vm._v(" "),
     _c(
       "form",
@@ -47531,6 +47591,50 @@ var render = function() {
           )
         ])
       ]
+    ),
+    _vm._v(" "),
+    _c("h1", [_vm._v("Contacts")]),
+    _vm._v(" "),
+    _c(
+      "ul",
+      { staticClass: "list-group" },
+      _vm._l(_vm.list, function(contact) {
+        return _c("li", { staticClass: "list-group-item" }, [
+          _c("strong", [_vm._v(_vm._s(contact.name))]),
+          _vm._v(
+            " : [" +
+              _vm._s(contact.phone) +
+              "] / [" +
+              _vm._s(contact.email) +
+              "]\n            "
+          ),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary btn-sm",
+              on: {
+                click: function($event) {
+                  _vm.showContact(contact.id)
+                }
+              }
+            },
+            [_vm._v("Edit")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-danger btn-sm",
+              on: {
+                click: function($event) {
+                  _vm.deleteContact(contact.id)
+                }
+              }
+            },
+            [_vm._v("Delete")]
+          )
+        ])
+      })
     )
   ])
 }
